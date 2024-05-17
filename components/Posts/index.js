@@ -33,69 +33,89 @@ const LoadMoreButton = styled.button(() => ({
 }));
 
 export default function Posts() {
+
+    // State variables for posts, loading indicator, start index, visibility of load more button, and click count
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [start, setStart] = useState(0);
+  const [showLoadMore, setShowLoadMore] = useState(false); // Initialize to false
+  const [clickCount, setClickCount] = useState(0);
+  const limit = 9;
 
+
+  // Custom hook to get window width for responsive design
   const { isSmallerDevice } = useWindowWidth();
 
+
+  // Fetch initial posts when component mounts
   useEffect(() => {
-    const fetchPosts = async () => {
+    const fetchInitialPosts = async () => {
       try {
-        // Fetch posts from the API
-        const { data: posts } = await axios.get('/api/v1/posts', {
-          params: { start: 0, limit: isSmallerDevice ? 5 : 10 },
+        const { data: initialPosts } = await axios.get('/api/v1/posts', {
+          params: { start, limit: isSmallerDevice ? 5 : 10 },
         });
 
-        
-        const postsWithImages = await Promise.all(posts.map(async (post) => {
-          // Fetch photos for the album associated with the post
-          const { data: photos } = await axios.get(`https://jsonplaceholder.typicode.com/albums/${post.id}/photos`);
-          
-          const images = photos.map(photo => ({ url: photo.url }));
-          // Combine post data with images
-          return { ...post, images };
-        }));
-
-        // Update state with posts containing images
-        setPosts(postsWithImages);
+        setPosts(initialPosts);
+        setStart(start + initialPosts.length);
+        if (initialPosts.length < limit) {
+          setShowLoadMore(false);
+        } else {
+          setShowLoadMore(true); // Update to true if there are more posts to load
+        }
       } catch (error) {
-        console.error('Error fetching posts:', error);
+        console.error('Error fetching initial posts:', error);
       }
     };
 
-    fetchPosts();
+    fetchInitialPosts();
   }, [isSmallerDevice]);
 
-  const handleClick = () => {
-    setIsLoading(true);
+  const fetchMorePosts = async () => {
+    try {
+      setIsLoading(true);
+      const { data: newPosts } = await axios.get('/api/v1/posts', {
+        params: { start, limit },
+      });
 
-    // add a loading delay
-    setTimeout(() => {
+      // If no new posts are fetched or the number of fetched posts is less than the limit, hide load more button
+
+      if (newPosts.length === 0 || newPosts.length < limit) {
+        setShowLoadMore(false);
+      } else {
+        setShowLoadMore(true); // Update to true if there are more posts to load
+        setStart(start + newPosts.length);
+        setPosts([...posts, ...newPosts]);
+      }
+
+      setClickCount(prevCount => prevCount + 1);
+    } catch (error) {
+      console.error('Error fetching more posts:', error);
+    } finally {
       setIsLoading(false);
-    }, 3000);
+    }
   };
+
+  useEffect(() => {
+    if (posts.length > 50) {
+      setShowLoadMore(false);
+    }
+  }, [posts]);
 
   return (
     <Container>
       <PostListContainer>
         {posts.map(post => (
-          <Post key={post.id} post={post} /> 
+          <Post key={post.id} post={post} />
         ))}
       </PostListContainer>
 
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <LoadMoreButton onClick={handleClick} disabled={isLoading}>
-          {!isLoading ? 'Load More' : 'Loading...'}
-        </LoadMoreButton>
-      </div>
+      {showLoadMore && (
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <LoadMoreButton onClick={fetchMorePosts} disabled={isLoading}>
+            {!isLoading ? 'Load More' : 'Loading...'}
+          </LoadMoreButton>
+        </div>
+      )}
     </Container>
   );
 }
-
-/*
- 
-
-2nd Task Done ✅✅
-
-Replace dummy images by fetching each album of post using "https://jsonplaceholder.typicode.com/albums/1/photos" in /api/v1/posts route.
-*/
