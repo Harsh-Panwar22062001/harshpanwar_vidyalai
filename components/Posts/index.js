@@ -101,8 +101,50 @@ export default function Posts() {
     }
   }, [posts]);
 
+
+
+
+
+  const fetchUserNameAndEmail = async () => {
+    try {
+      const usersResponse = await axios.get('https://jsonplaceholder.typicode.com/users');
+      const users = usersResponse.data;
+  
+      const updatedPosts = posts.map(post => {
+        const user = users.find(user => user.id === post.userId);
+        if (user) {
+          return {
+            ...post,
+            userName: user.username,
+            userEmail: user.email,
+            userInitials: `${user.name.charAt(0)}${user.name.split(' ')[1] ? user.name.split(' ')[1].charAt(0) : ''}`,
+          };
+        }
+        return post;
+      });
+  
+      setPosts(updatedPosts);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+  
+  
+  
+
+  useEffect(() => {
+    fetchUserNameAndEmail();
+  }, []);
+
+
   return (
     <Container>
+
+    <PostListContainer>
+        {posts.map(post => (
+          <Post key={post.id} post={post} />
+        ))}
+      </PostListContainer>
       <PostListContainer>
         {posts.map(post => (
           <Post key={post.id} post={post} />

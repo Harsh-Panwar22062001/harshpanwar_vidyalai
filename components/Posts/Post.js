@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import styled from '@emotion/styled';
+import axios from 'axios';
 
-// Styled components for the Post UI✅✅
 const PostContainer = styled.div(() => ({
   width: '300px',
   margin: '10px',
@@ -49,7 +49,6 @@ const Content = styled.div(() => ({
   },
 }));
 
-// Modified Button styling to vertically center the buttons relative to the image
 const Button = styled.button(() => ({
   position: 'absolute',
   backgroundColor: 'rgba(255, 255, 255, 0.5)',
@@ -63,8 +62,6 @@ const Button = styled.button(() => ({
   alignItems: 'center',
   justifyContent: 'center',
   zIndex: 1,
-  top: '50%', // Center the button vertically
-  transform: 'translateY(-50%)', // Center the button vertically
 }));
 
 const PrevButton = styled(Button)`
@@ -75,10 +72,41 @@ const NextButton = styled(Button)`
   right: 10px;
 `;
 
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 10px;
+`;
+
+const ProfileCircle = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  margin-right: 10px;
+`;
+
+const UserName = styled.div`
+  font-weight: bold;
+`;
+
+const UserEmail = styled.div`
+  color: #777;
+`;
+
 const Post = ({ post }) => {
   const carouselRef = useRef(null);
+  const [loadedImages, setLoadedImages] = useState([]);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userInitials, setUserInitials] = useState('');
 
-  // Scrolls to the next image when the next button is clicked
   const handleNextClick = () => {
     if (carouselRef.current) {
       const scrollAmount = carouselRef.current.offsetWidth;
@@ -89,7 +117,6 @@ const Post = ({ post }) => {
     }
   };
 
-  // Scrolls to the previous image when the previous button is clicked
   const handlePrevClick = () => {
     if (carouselRef.current) {
       const scrollAmount = -carouselRef.current.offsetWidth;
@@ -100,20 +127,45 @@ const Post = ({ post }) => {
     }
   };
 
+  const handleImageLoad = (index) => {
+    if (!loadedImages.includes(index)) {
+      setLoadedImages([...loadedImages, index]);
+    }
+  };
+
+  useEffect(() => {
+    const fetchUserNameAndEmail = async () => {
+      try {
+        const { data: user } = await axios.get(`https://jsonplaceholder.typicode.com/users/${post.userId}`);
+        setUserName(user.name);
+        setUserEmail(user.email);
+        setUserInitials(`${user.name.split(' ')[0][0]}${user.name.split(' ')[1][0]}`);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserNameAndEmail();
+  }, [post.userId]);
+
   return (
     <PostContainer>
+      <UserInfo>
+        <ProfileCircle>{userInitials}</ProfileCircle>
+        <div>
+          <UserName>{userName}</UserName>
+          <UserEmail>{userEmail}</UserEmail>
+        </div>
+      </UserInfo>
       <CarouselContainer>
-        {/* Button to scroll to the previous image */}
         <PrevButton onClick={handlePrevClick}>&#10094;</PrevButton>
-        {/* Carousel containing the images */}
         <Carousel ref={carouselRef}>
           {post.images.map((image, index) => (
-            <CarouselItem key={index}>
-              <Image src={image.url} alt={post.title} />
+            <CarouselItem key={index} style={{ display: loadedImages.includes(index) ? 'block' : 'none' }}>
+              <Image src={image.url} alt={post.title} onLoad={() => handleImageLoad(index)} />
             </CarouselItem>
           ))}
         </Carousel>
-        {/* Button to scroll to the next image */}
         <NextButton onClick={handleNextClick}>&#10095;</NextButton>
       </CarouselContainer>
       <Content>
@@ -129,6 +181,7 @@ Post.propTypes = {
     images: PropTypes.arrayOf(PropTypes.shape({
       url: PropTypes.string.isRequired,
     })).isRequired,
+    userId: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired,
     body: PropTypes.string.isRequired,
   }).isRequired,
