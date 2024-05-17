@@ -39,19 +39,37 @@ export default function Posts() {
   const { isSmallerDevice } = useWindowWidth();
 
   useEffect(() => {
-    const fetchPost = async () => {
-      const { data: posts } = await axios.get('/api/v1/posts', {
-        params: { start: 0, limit: isSmallerDevice ? 5 : 10 },
-      });
-      setPosts(posts);
+    const fetchPosts = async () => {
+      try {
+        // Fetch posts from the API
+        const { data: posts } = await axios.get('/api/v1/posts', {
+          params: { start: 0, limit: isSmallerDevice ? 5 : 10 },
+        });
+
+        
+        const postsWithImages = await Promise.all(posts.map(async (post) => {
+          // Fetch photos for the album associated with the post
+          const { data: photos } = await axios.get(`https://jsonplaceholder.typicode.com/albums/${post.id}/photos`);
+          
+          const images = photos.map(photo => ({ url: photo.url }));
+          // Combine post data with images
+          return { ...post, images };
+        }));
+
+        // Update state with posts containing images
+        setPosts(postsWithImages);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+      }
     };
 
-    fetchPost();
+    fetchPosts();
   }, [isSmallerDevice]);
 
   const handleClick = () => {
     setIsLoading(true);
 
+    // add a loading delay
     setTimeout(() => {
       setIsLoading(false);
     }, 3000);
@@ -61,7 +79,7 @@ export default function Posts() {
     <Container>
       <PostListContainer>
         {posts.map(post => (
-          <Post post={post} />
+          <Post key={post.id} post={post} /> 
         ))}
       </PostListContainer>
 
@@ -73,3 +91,11 @@ export default function Posts() {
     </Container>
   );
 }
+
+/*
+ 
+
+2nd Task Done ✅✅
+
+Replace dummy images by fetching each album of post using "https://jsonplaceholder.typicode.com/albums/1/photos" in /api/v1/posts route.
+*/
