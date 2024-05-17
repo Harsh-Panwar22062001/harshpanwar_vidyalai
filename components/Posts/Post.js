@@ -133,6 +133,9 @@ const Post = ({ post }) => {
     }
   };
 
+
+
+  // fetching the name and email
   useEffect(() => {
     const fetchUserNameAndEmail = async () => {
       try {
@@ -153,7 +156,10 @@ const Post = ({ post }) => {
       <UserInfo>
         <ProfileCircle>{userInitials}</ProfileCircle>
         <div>
-          <UserName>{userName}</UserName>
+        {/* displaying the name in post */}
+          <UserName>{userName}</UserName> 
+
+          {/* displaying the email in post */}
           <UserEmail>{userEmail}</UserEmail>
         </div>
       </UserInfo>
@@ -176,6 +182,8 @@ const Post = ({ post }) => {
   );
 };
 
+
+// Prop types definition for Post component
 Post.propTypes = {
   post: PropTypes.shape({
     images: PropTypes.arrayOf(PropTypes.shape({
