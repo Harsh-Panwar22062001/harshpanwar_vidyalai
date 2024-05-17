@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React, { useRef } from 'react';
 import styled from '@emotion/styled';
 
+// Styled components for the Post UI✅✅
 const PostContainer = styled.div(() => ({
   width: '300px',
   margin: '10px',
@@ -12,6 +13,8 @@ const PostContainer = styled.div(() => ({
 
 const CarouselContainer = styled.div(() => ({
   position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
 }));
 
 const Carousel = styled.div(() => ({
@@ -22,7 +25,9 @@ const Carousel = styled.div(() => ({
   '&::-webkit-scrollbar': {
     display: 'none',
   },
-  position: 'relative',
+  scrollSnapType: 'x mandatory',
+  scrollBehavior: 'smooth',
+  width: '100%',
 }));
 
 const CarouselItem = styled.div(() => ({
@@ -44,15 +49,22 @@ const Content = styled.div(() => ({
   },
 }));
 
+// Modified Button styling to vertically center the buttons relative to the image
 const Button = styled.button(() => ({
   position: 'absolute',
-  bottom: 0,
   backgroundColor: 'rgba(255, 255, 255, 0.5)',
   border: 'none',
   color: '#000',
   fontSize: '20px',
   cursor: 'pointer',
   height: '50px',
+  width: '50px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1,
+  top: '50%', // Center the button vertically
+  transform: 'translateY(-50%)', // Center the button vertically
 }));
 
 const PrevButton = styled(Button)`
@@ -66,19 +78,23 @@ const NextButton = styled(Button)`
 const Post = ({ post }) => {
   const carouselRef = useRef(null);
 
+  // Scrolls to the next image when the next button is clicked
   const handleNextClick = () => {
     if (carouselRef.current) {
+      const scrollAmount = carouselRef.current.offsetWidth;
       carouselRef.current.scrollBy({
-        left: 50,
+        left: scrollAmount,
         behavior: 'smooth',
       });
     }
   };
 
+  // Scrolls to the previous image when the previous button is clicked
   const handlePrevClick = () => {
     if (carouselRef.current) {
+      const scrollAmount = -carouselRef.current.offsetWidth;
       carouselRef.current.scrollBy({
-        left: -70,
+        left: scrollAmount,
         behavior: 'smooth',
       });
     }
@@ -87,6 +103,9 @@ const Post = ({ post }) => {
   return (
     <PostContainer>
       <CarouselContainer>
+        {/* Button to scroll to the previous image */}
+        <PrevButton onClick={handlePrevClick}>&#10094;</PrevButton>
+        {/* Carousel containing the images */}
         <Carousel ref={carouselRef}>
           {post.images.map((image, index) => (
             <CarouselItem key={index}>
@@ -94,7 +113,7 @@ const Post = ({ post }) => {
             </CarouselItem>
           ))}
         </Carousel>
-        <PrevButton onClick={handlePrevClick}>&#10094;</PrevButton>
+        {/* Button to scroll to the next image */}
         <NextButton onClick={handleNextClick}>&#10095;</NextButton>
       </CarouselContainer>
       <Content>
@@ -107,12 +126,12 @@ const Post = ({ post }) => {
 
 Post.propTypes = {
   post: PropTypes.shape({
-    content: PropTypes.any,
-    images: PropTypes.shape({
-      map: PropTypes.func,
-    }),
-    title: PropTypes.any,
-  }),
+    images: PropTypes.arrayOf(PropTypes.shape({
+      url: PropTypes.string.isRequired,
+    })).isRequired,
+    title: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default Post;
