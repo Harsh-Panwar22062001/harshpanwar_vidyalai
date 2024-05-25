@@ -1,55 +1,31 @@
-## Getting Started
+# harshpanwar_vidyalAi Assessment
 
-Step 1: Clone the repository to your local system. Ensure not to fork it.
+## Overview
+This Project includes tasks ranging from UI fixes to implementing new features and improving code structure.
 
-Step 2: Create a new branch - "your_name_vidyalai" in your local repository for making changes.
+## Tasks
 
-Step 3: Install packages and make sure you are using Node.js version 18.20 or higher.
+- [1] Fix carousel scrolling UI: Improved navigation button functionality and centered them vertically relative to the image -  TaskDone✅✅
+- [2] Replace dummy images by fetching each album of post using "https://jsonplaceholder.typicode.com/albums/1/photos" in /api/v1/posts route.  -  TaskDone✅✅
+- [3] Make the top nav bar sticky during scrolling.  - TaskDone✅✅
+- [4] Implement functionality to load more posts upon clicking the "Load More" button. Hide the button if no posts exist.  - TaskDone✅✅
+- [5] Display the user's name and email in each post. Show the first letter for both the first and last names. - TaskDone✅✅
+- [6] Converted UserList React class component to functional component and converted with UserData HOC to a custom React hook. - TaskDone✅✅
+- [7] Converted useWindowWidth hook to ContextAPI. Declared the ContextAPI globally and accessed the isSmallerDevice property. - TaskDone✅✅
 
-```bash
-npm i
-```
+## Features Added
+- Improved carousel scrolling UI with centered navigation buttons.
+- Dynamic loading of post images from external API.
+- Sticky top nav bar for improved navigation experience.
+- Load more posts functionality to handle large datasets efficiently.
+- Display of user's name and email in each post with initials.
+- Converted class components to functional components and HOC to custom hooks.
+- Global ContextAPI implementation for window width detection.
 
-Step 4: Run the development server:
+## Usage
+1. Step-1:git clone https://github.com/Harsh-Panwar22062001/harshpanwar_vidyalai
+2. Step-2:cd harshpanwar_vidyalai
+3. step-3: npm install
+4: step-4 : npm run dev
 
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result and complete the tasks mentioned below:
-
-## TASKS
-**Note: These tasks need to be completed within 3.5 hours.**
-- [ ] Fix carousel scrolling UI: When navigation buttons are clicked, ensure a new image is shown. Additionally, center the carousel navigation buttons vertically relative to the image.
-- [ ] Replace dummy images by fetching each album of post using "https://jsonplaceholder.typicode.com/albums/1/photos" in /api/v1/posts route.
-- [ ] Make the top nav bar sticky during scrolling.
-- [ ] Implement functionality to load more posts upon clicking the "Load More" button. Hide the "Load More" button if no posts exist.
-- [ ] Display the user's name and email in each post. Show the first letter for both the first and last names.
-
-  ![Screenshot from 2024-05-04 08-35-47](https://github.com/vidyalai/interview-challenge-1/assets/67904627/a1dd3dca-27e8-427b-a6dc-41de00d15df1)
-
-- [ ] Convert `UserList` React class component to functional component and convert `witUserData` HOC (Higher order Component) to a custom React hooks
-- [ ] Convert `useWindowWidth` hook to ContextAPI. Declare the ContextAPI globally and access the `isSmallerDevice` property.
-
-
-
-## Submission
-- Create a new public repository in your github account
-
-- Push the changes from your local to the new repo on GitHub.
-
-- Update the readme by putting a check mark against the tasks you have completed. If you have not completed all the tasks, make sure to tick all the relevant ones. 
-
-- Open a pull request from "your_name_vidyalai" to "master"
-Fill [this form](https://docs.google.com/forms/d/e/1FAIpQLSeACdInJitqQ8hncrJdsTYEXVuts0Rb_WlMhLihXz06MTFmwA/viewform) with a link to the pull request 
-
-
-## Evaluation Criteria
-- Clarity and consistency of naming conventions.
-- Effectiveness of code modularization.
-- Adequacy and robustness of error handling mechanisms.
-- Efficiency of code optimization techniques.
-- Quality and comprehensiveness of code documentation.
-
-
-
+![alt text](image-1.png)

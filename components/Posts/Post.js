@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import styled from '@emotion/styled';
+import axios from 'axios';
 
 const PostContainer = styled.div(() => ({
   width: '300px',
@@ -12,6 +13,8 @@ const PostContainer = styled.div(() => ({
 
 const CarouselContainer = styled.div(() => ({
   position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
 }));
 
 const Carousel = styled.div(() => ({
@@ -22,7 +25,9 @@ const Carousel = styled.div(() => ({
   '&::-webkit-scrollbar': {
     display: 'none',
   },
-  position: 'relative',
+  scrollSnapType: 'x mandatory',
+  scrollBehavior: 'smooth',
+  width: '100%',
 }));
 
 const CarouselItem = styled.div(() => ({
@@ -46,13 +51,17 @@ const Content = styled.div(() => ({
 
 const Button = styled.button(() => ({
   position: 'absolute',
-  bottom: 0,
   backgroundColor: 'rgba(255, 255, 255, 0.5)',
   border: 'none',
   color: '#000',
   fontSize: '20px',
   cursor: 'pointer',
   height: '50px',
+  width: '50px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1,
 }));
 
 const PrevButton = styled(Button)`
@@ -63,13 +72,46 @@ const NextButton = styled(Button)`
   right: 10px;
 `;
 
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 10px;
+`;
+
+const ProfileCircle = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  margin-right: 10px;
+`;
+
+const UserName = styled.div`
+  font-weight: bold;
+`;
+
+const UserEmail = styled.div`
+  color: #777;
+`;
+
 const Post = ({ post }) => {
   const carouselRef = useRef(null);
+  const [loadedImages, setLoadedImages] = useState([]);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userInitials, setUserInitials] = useState('');
 
   const handleNextClick = () => {
     if (carouselRef.current) {
+      const scrollAmount = carouselRef.current.offsetWidth;
       carouselRef.current.scrollBy({
-        left: 50,
+        left: scrollAmount,
         behavior: 'smooth',
       });
     }
@@ -77,24 +119,59 @@ const Post = ({ post }) => {
 
   const handlePrevClick = () => {
     if (carouselRef.current) {
+      const scrollAmount = -carouselRef.current.offsetWidth;
       carouselRef.current.scrollBy({
-        left: -70,
+        left: scrollAmount,
         behavior: 'smooth',
       });
     }
   };
 
+  const handleImageLoad = (index) => {
+    if (!loadedImages.includes(index)) {
+      setLoadedImages([...loadedImages, index]);
+    }
+  };
+
+
+
+  // fetching the name and email
+  useEffect(() => {
+    const fetchUserNameAndEmail = async () => {
+      try {
+        const { data: user } = await axios.get(`https://jsonplaceholder.typicode.com/users/${post.userId}`);
+        setUserName(user.name);
+        setUserEmail(user.email);
+        setUserInitials(`${user.name.split(' ')[0][0]}${user.name.split(' ')[1][0]}`);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserNameAndEmail();
+  }, [post.userId]);
+
   return (
     <PostContainer>
+      <UserInfo>
+        <ProfileCircle>{userInitials}</ProfileCircle>
+        <div>
+        {/* displaying the name in post */}
+          <UserName>{userName}</UserName> 
+
+          {/* displaying the email in post */}
+          <UserEmail>{userEmail}</UserEmail>
+        </div>
+      </UserInfo>
       <CarouselContainer>
+        <PrevButton onClick={handlePrevClick}>&#10094;</PrevButton>
         <Carousel ref={carouselRef}>
           {post.images.map((image, index) => (
-            <CarouselItem key={index}>
-              <Image src={image.url} alt={post.title} />
+            <CarouselItem key={index} style={{ display: loadedImages.includes(index) ? 'block' : 'none' }}>
+              <Image src={image.url} alt={post.title} onLoad={() => handleImageLoad(index)} />
             </CarouselItem>
           ))}
         </Carousel>
-        <PrevButton onClick={handlePrevClick}>&#10094;</PrevButton>
         <NextButton onClick={handleNextClick}>&#10095;</NextButton>
       </CarouselContainer>
       <Content>
@@ -105,14 +182,17 @@ const Post = ({ post }) => {
   );
 };
 
+
+// Prop types definition for Post component
 Post.propTypes = {
   post: PropTypes.shape({
-    content: PropTypes.any,
-    images: PropTypes.shape({
-      map: PropTypes.func,
-    }),
-    title: PropTypes.any,
-  }),
+    images: PropTypes.arrayOf(PropTypes.shape({
+      url: PropTypes.string.isRequired,
+    })).isRequired,
+    userId: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default Post;
